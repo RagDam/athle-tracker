@@ -257,8 +257,8 @@ export default function FavoritesPage() {
                   Comment ajouter des favoris ?
                 </h3>
                 <p className="text-sm text-muted-foreground">
-                  Rendez-vous sur la page Classements et cliquez sur l'icône
-                  étoile à côté du nom d'un athlète pour l'ajouter à vos
+                  Rendez-vous sur la page Classements et cliquez sur l&apos;icône
+                  étoile à côté du nom d&apos;un athlète pour l&apos;ajouter à vos
                   favoris. Vous recevrez alors des alertes automatiques en cas
                   de changement de position.
                 </p>

@@ -29,8 +29,7 @@ export default function RankingsPage() {
   const [rankings, setRankings] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
-  // Filter states for each column
-  const [filterRang, setFilterRang] = useState("");
+  // Filter states for each column (no filter for rank)
   const [filterAthlete, setFilterAthlete] = useState("");
   const [filterClub, setFilterClub] = useState("");
   const [filterPerformance, setFilterPerformance] = useState("");
@@ -88,7 +87,6 @@ export default function RankingsPage() {
 
   // Clear all filters
   const clearFilters = () => {
-    setFilterRang("");
     setFilterAthlete("");
     setFilterClub("");
     setFilterPerformance("");
@@ -97,14 +95,11 @@ export default function RankingsPage() {
 
   // Check if any filter is active
   const hasActiveFilters =
-    filterRang || filterAthlete || filterClub || filterPerformance || filterDate;
+    filterAthlete || filterClub || filterPerformance || filterDate;
 
   // Filter rankings based on all column filters
   const filteredRankings = useMemo(() => {
     return rankings.filter((ranking) => {
-      const matchRang = filterRang === "" ||
-        ranking.rang.toString().includes(filterRang);
-
       const matchAthlete = filterAthlete === "" ||
         ranking.athlete_nom.toLowerCase().includes(filterAthlete.toLowerCase());
 
@@ -119,9 +114,9 @@ export default function RankingsPage() {
           .toLocaleDateString("fr-FR")
           .includes(filterDate);
 
-      return matchRang && matchAthlete && matchClub && matchPerformance && matchDate;
+      return matchAthlete && matchClub && matchPerformance && matchDate;
     });
-  }, [rankings, filterRang, filterAthlete, filterClub, filterPerformance, filterDate]);
+  }, [rankings, filterAthlete, filterClub, filterPerformance, filterDate]);
 
   if (!user) {
     return (
@@ -162,59 +157,27 @@ export default function RankingsPage() {
               </p>
             ) : (
               <div className="space-y-4">
-                {/* Search filters */}
-                <div className="flex flex-col gap-2">
-                  <div className="flex items-center justify-between">
-                    <h3 className="text-sm font-medium">Rechercher</h3>
-                    {hasActiveFilters && (
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={clearFilters}
-                        className="h-8 text-xs"
-                      >
-                        <X className="mr-1 h-3 w-3" />
-                        Effacer les filtres
-                      </Button>
-                    )}
-                  </div>
-                  <div className="grid grid-cols-1 md:grid-cols-6 gap-2">
-                    <Input
-                      placeholder="Rang..."
-                      value={filterRang}
-                      onChange={(e) => setFilterRang(e.target.value)}
-                      className="h-9"
-                    />
-                    <Input
-                      placeholder="Athlète..."
-                      value={filterAthlete}
-                      onChange={(e) => setFilterAthlete(e.target.value)}
-                      className="h-9 md:col-span-2"
-                    />
-                    <Input
-                      placeholder="Club..."
-                      value={filterClub}
-                      onChange={(e) => setFilterClub(e.target.value)}
-                      className="h-9 md:col-span-2"
-                    />
-                    <Input
-                      placeholder="Performance..."
-                      value={filterPerformance}
-                      onChange={(e) => setFilterPerformance(e.target.value)}
-                      className="h-9"
-                    />
-                  </div>
-                </div>
-
-                {/* Results count */}
+                {/* Clear filters button and results count */}
                 {hasActiveFilters && (
-                  <p className="text-sm text-muted-foreground">
-                    {filteredRankings.length} résultat(s) sur {rankings.length}
-                  </p>
+                  <div className="flex items-center justify-between">
+                    <p className="text-sm text-muted-foreground">
+                      {filteredRankings.length} résultat(s) sur {rankings.length}
+                    </p>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={clearFilters}
+                      className="h-8 text-xs"
+                    >
+                      <X className="mr-1 h-3 w-3" />
+                      Effacer les filtres
+                    </Button>
+                  </div>
                 )}
 
                 <Table>
                   <TableHeader>
+                    {/* Column labels */}
                     <TableRow>
                       <TableHead className="w-20">Rang</TableHead>
                       <TableHead>Athlète</TableHead>
@@ -222,6 +185,47 @@ export default function RankingsPage() {
                       <TableHead className="text-right">Performance</TableHead>
                       <TableHead className="text-right">Date</TableHead>
                       <TableHead className="w-24">Statut</TableHead>
+                    </TableRow>
+                    {/* Search inputs */}
+                    <TableRow className="hover:bg-transparent">
+                      <TableHead className="h-12 py-2">
+                        {/* No filter for rank */}
+                      </TableHead>
+                      <TableHead className="py-2">
+                        <Input
+                          placeholder="Rechercher..."
+                          value={filterAthlete}
+                          onChange={(e) => setFilterAthlete(e.target.value)}
+                          className="h-8 text-xs"
+                        />
+                      </TableHead>
+                      <TableHead className="py-2">
+                        <Input
+                          placeholder="Rechercher..."
+                          value={filterClub}
+                          onChange={(e) => setFilterClub(e.target.value)}
+                          className="h-8 text-xs"
+                        />
+                      </TableHead>
+                      <TableHead className="py-2">
+                        <Input
+                          placeholder="Rechercher..."
+                          value={filterPerformance}
+                          onChange={(e) => setFilterPerformance(e.target.value)}
+                          className="h-8 text-xs text-right"
+                        />
+                      </TableHead>
+                      <TableHead className="py-2">
+                        <Input
+                          placeholder="JJ/MM/AAAA"
+                          value={filterDate}
+                          onChange={(e) => setFilterDate(e.target.value)}
+                          className="h-8 text-xs text-right"
+                        />
+                      </TableHead>
+                      <TableHead className="py-2">
+                        {/* No filter for status */}
+                      </TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
