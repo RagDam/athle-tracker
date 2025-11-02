@@ -17,7 +17,7 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { X } from "lucide-react";
+import { X, Search } from "lucide-react";
 
 /**
  * Rankings page - displays current rankings for all active competitions.
@@ -34,6 +34,24 @@ export default function RankingsPage() {
   const [filterClub, setFilterClub] = useState("");
   const [filterPerformance, setFilterPerformance] = useState("");
   const [filterDate, setFilterDate] = useState("");
+
+  // Debounced filter states (used for actual filtering)
+  const [debouncedFilterAthlete, setDebouncedFilterAthlete] = useState("");
+  const [debouncedFilterClub, setDebouncedFilterClub] = useState("");
+  const [debouncedFilterPerformance, setDebouncedFilterPerformance] = useState("");
+  const [debouncedFilterDate, setDebouncedFilterDate] = useState("");
+
+  // Debounce effect for filters (500ms delay)
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setDebouncedFilterAthlete(filterAthlete);
+      setDebouncedFilterClub(filterClub);
+      setDebouncedFilterPerformance(filterPerformance);
+      setDebouncedFilterDate(filterDate);
+    }, 500);
+
+    return () => clearTimeout(timer);
+  }, [filterAthlete, filterClub, filterPerformance, filterDate]);
 
   useEffect(() => {
     // Check authentication
@@ -95,28 +113,28 @@ export default function RankingsPage() {
 
   // Check if any filter is active
   const hasActiveFilters =
-    filterAthlete || filterClub || filterPerformance || filterDate;
+    debouncedFilterAthlete || debouncedFilterClub || debouncedFilterPerformance || debouncedFilterDate;
 
-  // Filter rankings based on all column filters
+  // Filter rankings based on all column filters (using debounced values)
   const filteredRankings = useMemo(() => {
     return rankings.filter((ranking) => {
-      const matchAthlete = filterAthlete === "" ||
-        ranking.athlete_nom.toLowerCase().includes(filterAthlete.toLowerCase());
+      const matchAthlete = debouncedFilterAthlete === "" ||
+        ranking.athlete_nom.toLowerCase().includes(debouncedFilterAthlete.toLowerCase());
 
-      const matchClub = filterClub === "" ||
-        (ranking.club && ranking.club.toLowerCase().includes(filterClub.toLowerCase()));
+      const matchClub = debouncedFilterClub === "" ||
+        (ranking.club && ranking.club.toLowerCase().includes(debouncedFilterClub.toLowerCase()));
 
-      const matchPerformance = filterPerformance === "" ||
-        ranking.performance.toLowerCase().includes(filterPerformance.toLowerCase());
+      const matchPerformance = debouncedFilterPerformance === "" ||
+        ranking.performance.toLowerCase().includes(debouncedFilterPerformance.toLowerCase());
 
-      const matchDate = filterDate === "" ||
+      const matchDate = debouncedFilterDate === "" ||
         new Date(ranking.date_performance)
           .toLocaleDateString("fr-FR")
-          .includes(filterDate);
+          .includes(debouncedFilterDate);
 
       return matchAthlete && matchClub && matchPerformance && matchDate;
     });
-  }, [rankings, filterAthlete, filterClub, filterPerformance, filterDate]);
+  }, [rankings, debouncedFilterAthlete, debouncedFilterClub, debouncedFilterPerformance, debouncedFilterDate]);
 
   if (!user) {
     return (
@@ -192,36 +210,80 @@ export default function RankingsPage() {
                         {/* No filter for rank */}
                       </TableHead>
                       <TableHead className="py-2">
-                        <Input
-                          placeholder="Rechercher..."
-                          value={filterAthlete}
-                          onChange={(e) => setFilterAthlete(e.target.value)}
-                          className="h-8 text-xs"
-                        />
+                        <div className="relative">
+                          <Search className="absolute left-2 top-1/2 h-3 w-3 -translate-y-1/2 text-muted-foreground" />
+                          <Input
+                            placeholder="Rechercher..."
+                            value={filterAthlete}
+                            onChange={(e) => setFilterAthlete(e.target.value)}
+                            className="h-8 text-xs pl-7 pr-7"
+                          />
+                          {filterAthlete && (
+                            <button
+                              onClick={() => setFilterAthlete("")}
+                              className="absolute right-2 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
+                            >
+                              <X className="h-3 w-3" />
+                            </button>
+                          )}
+                        </div>
                       </TableHead>
                       <TableHead className="py-2">
-                        <Input
-                          placeholder="Rechercher..."
-                          value={filterClub}
-                          onChange={(e) => setFilterClub(e.target.value)}
-                          className="h-8 text-xs"
-                        />
+                        <div className="relative">
+                          <Search className="absolute left-2 top-1/2 h-3 w-3 -translate-y-1/2 text-muted-foreground" />
+                          <Input
+                            placeholder="Rechercher..."
+                            value={filterClub}
+                            onChange={(e) => setFilterClub(e.target.value)}
+                            className="h-8 text-xs pl-7 pr-7"
+                          />
+                          {filterClub && (
+                            <button
+                              onClick={() => setFilterClub("")}
+                              className="absolute right-2 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
+                            >
+                              <X className="h-3 w-3" />
+                            </button>
+                          )}
+                        </div>
                       </TableHead>
                       <TableHead className="py-2">
-                        <Input
-                          placeholder="Rechercher..."
-                          value={filterPerformance}
-                          onChange={(e) => setFilterPerformance(e.target.value)}
-                          className="h-8 text-xs text-right"
-                        />
+                        <div className="relative">
+                          <Search className="absolute left-2 top-1/2 h-3 w-3 -translate-y-1/2 text-muted-foreground" />
+                          <Input
+                            placeholder="Rechercher..."
+                            value={filterPerformance}
+                            onChange={(e) => setFilterPerformance(e.target.value)}
+                            className="h-8 text-xs pl-7 pr-7"
+                          />
+                          {filterPerformance && (
+                            <button
+                              onClick={() => setFilterPerformance("")}
+                              className="absolute right-2 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
+                            >
+                              <X className="h-3 w-3" />
+                            </button>
+                          )}
+                        </div>
                       </TableHead>
                       <TableHead className="py-2">
-                        <Input
-                          placeholder="JJ/MM/AAAA"
-                          value={filterDate}
-                          onChange={(e) => setFilterDate(e.target.value)}
-                          className="h-8 text-xs text-right"
-                        />
+                        <div className="relative">
+                          <Search className="absolute left-2 top-1/2 h-3 w-3 -translate-y-1/2 text-muted-foreground" />
+                          <Input
+                            placeholder="JJ/MM/AAAA"
+                            value={filterDate}
+                            onChange={(e) => setFilterDate(e.target.value)}
+                            className="h-8 text-xs pl-7 pr-7"
+                          />
+                          {filterDate && (
+                            <button
+                              onClick={() => setFilterDate("")}
+                              className="absolute right-2 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
+                            >
+                              <X className="h-3 w-3" />
+                            </button>
+                          )}
+                        </div>
                       </TableHead>
                       <TableHead className="py-2">
                         {/* No filter for status */}
