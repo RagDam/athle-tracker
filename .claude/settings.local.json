@@ -1,0 +1,32 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(mkdir:*)",
+      "Bash(__init__.py)",
+      "Bash(\"e:\\ONEDRIVE\\1 - Personnel\\Sites Web\\athle-tracker\\__init__.py\")",
+      "Bash(export PYTHONPATH=\"$PWD\")",
+      "Bash(python -m streamlit:*)",
+      "Bash(dir:*)",
+      "Bash(move pages views)",
+      "Bash(python test_scraper_debug.py:*)",
+      "Bash(venvScriptspython.exe test_scraper_debug.py)",
+      "Bash(./venv/Scripts/python.exe:*)",
+      "Bash(npx create-next-app@latest:*)",
+      "Bash(npm install)",
+      "Bash(npm run dev:*)",
+      "Bash(npm install:*)",
+      "Bash(npx shadcn@latest add:*)",
+      "Bash(curl:*)",
+      "Bash(find:*)",
+      "Bash(taskkill:*)",
+      "Bash(nul)",
+      "Bash(Get-Process python -ErrorAction SilentlyContinue)",
+      "Bash(Stop-Process -Force)",
+      "Bash(cat:*)",
+      "Bash(tree:*)",
+      "Bash(powershell.exe -ExecutionPolicy Bypass -File push_to_github.ps1)"
+    ],
+    "deny": [],
+    "ask": []
+  }
+}

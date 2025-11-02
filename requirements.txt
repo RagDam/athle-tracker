@@ -1,0 +1,37 @@
+# Core Framework
+streamlit==1.31.0
+fastapi==0.109.0
+uvicorn[standard]==0.27.0
+
+# Database
+SQLAlchemy==2.0.25
+alembic==1.13.1
+
+# HTTP & Scraping
+httpx==0.26.0
+beautifulsoup4==4.12.3
+lxml==5.1.0
+
+# Scheduler
+APScheduler==3.10.4
+
+# Authentication & Security
+streamlit-authenticator==0.2.3
+bcrypt==4.0.1
+passlib==1.7.4
+python-jose[cryptography]==3.3.0
+
+# Data Visualization
+plotly==5.18.0
+pandas==2.2.0
+
+# Configuration
+python-dotenv==1.0.1
+pydantic[email]==2.5.3
+pydantic-settings==2.1.0
+
+# Timezone
+pytz==2024.1
+
+# Utilities
+python-dateutil==2.8.2
