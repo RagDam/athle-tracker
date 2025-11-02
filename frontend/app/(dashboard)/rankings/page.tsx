@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo } from "react";
 import { useRouter } from "next/navigation";
 import { MainLayout } from "@/components/layout/main-layout";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -15,6 +15,9 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
+import { X } from "lucide-react";
 
 /**
  * Rankings page - displays current rankings for all active competitions.
@@ -25,6 +28,13 @@ export default function RankingsPage() {
   const [currentPage, setCurrentPage] = useState("rankings");
   const [rankings, setRankings] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+
+  // Filter states for each column
+  const [filterRang, setFilterRang] = useState("");
+  const [filterAthlete, setFilterAthlete] = useState("");
+  const [filterClub, setFilterClub] = useState("");
+  const [filterPerformance, setFilterPerformance] = useState("");
+  const [filterDate, setFilterDate] = useState("");
 
   useEffect(() => {
     // Check authentication
@@ -76,6 +86,43 @@ export default function RankingsPage() {
     }
   };
 
+  // Clear all filters
+  const clearFilters = () => {
+    setFilterRang("");
+    setFilterAthlete("");
+    setFilterClub("");
+    setFilterPerformance("");
+    setFilterDate("");
+  };
+
+  // Check if any filter is active
+  const hasActiveFilters =
+    filterRang || filterAthlete || filterClub || filterPerformance || filterDate;
+
+  // Filter rankings based on all column filters
+  const filteredRankings = useMemo(() => {
+    return rankings.filter((ranking) => {
+      const matchRang = filterRang === "" ||
+        ranking.rang.toString().includes(filterRang);
+
+      const matchAthlete = filterAthlete === "" ||
+        ranking.athlete_nom.toLowerCase().includes(filterAthlete.toLowerCase());
+
+      const matchClub = filterClub === "" ||
+        (ranking.club && ranking.club.toLowerCase().includes(filterClub.toLowerCase()));
+
+      const matchPerformance = filterPerformance === "" ||
+        ranking.performance.toLowerCase().includes(filterPerformance.toLowerCase());
+
+      const matchDate = filterDate === "" ||
+        new Date(ranking.date_performance)
+          .toLocaleDateString("fr-FR")
+          .includes(filterDate);
+
+      return matchRang && matchAthlete && matchClub && matchPerformance && matchDate;
+    });
+  }, [rankings, filterRang, filterAthlete, filterClub, filterPerformance, filterDate]);
+
   if (!user) {
     return (
       <div className="flex min-h-screen items-center justify-center">
@@ -114,19 +161,71 @@ export default function RankingsPage() {
                 Aucun classement disponible pour le moment.
               </p>
             ) : (
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead className="w-20">Rang</TableHead>
-                    <TableHead>Athlète</TableHead>
-                    <TableHead>Club</TableHead>
-                    <TableHead className="text-right">Performance</TableHead>
-                    <TableHead className="text-right">Date</TableHead>
-                    <TableHead className="w-24">Statut</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {rankings.map((ranking) => (
+              <div className="space-y-4">
+                {/* Search filters */}
+                <div className="flex flex-col gap-2">
+                  <div className="flex items-center justify-between">
+                    <h3 className="text-sm font-medium">Rechercher</h3>
+                    {hasActiveFilters && (
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={clearFilters}
+                        className="h-8 text-xs"
+                      >
+                        <X className="mr-1 h-3 w-3" />
+                        Effacer les filtres
+                      </Button>
+                    )}
+                  </div>
+                  <div className="grid grid-cols-1 md:grid-cols-6 gap-2">
+                    <Input
+                      placeholder="Rang..."
+                      value={filterRang}
+                      onChange={(e) => setFilterRang(e.target.value)}
+                      className="h-9"
+                    />
+                    <Input
+                      placeholder="Athlète..."
+                      value={filterAthlete}
+                      onChange={(e) => setFilterAthlete(e.target.value)}
+                      className="h-9 md:col-span-2"
+                    />
+                    <Input
+                      placeholder="Club..."
+                      value={filterClub}
+                      onChange={(e) => setFilterClub(e.target.value)}
+                      className="h-9 md:col-span-2"
+                    />
+                    <Input
+                      placeholder="Performance..."
+                      value={filterPerformance}
+                      onChange={(e) => setFilterPerformance(e.target.value)}
+                      className="h-9"
+                    />
+                  </div>
+                </div>
+
+                {/* Results count */}
+                {hasActiveFilters && (
+                  <p className="text-sm text-muted-foreground">
+                    {filteredRankings.length} résultat(s) sur {rankings.length}
+                  </p>
+                )}
+
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead className="w-20">Rang</TableHead>
+                      <TableHead>Athlète</TableHead>
+                      <TableHead>Club</TableHead>
+                      <TableHead className="text-right">Performance</TableHead>
+                      <TableHead className="text-right">Date</TableHead>
+                      <TableHead className="w-24">Statut</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {filteredRankings.map((ranking) => (
                     <TableRow key={ranking.id}>
                       <TableCell className="font-medium">
                         {ranking.rang}
@@ -161,6 +260,7 @@ export default function RankingsPage() {
                   ))}
                 </TableBody>
               </Table>
+              </div>
             )}
           </CardContent>
         </Card>
@@ -175,9 +275,11 @@ export default function RankingsPage() {
               <span className="text-2xl">👥</span>
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">{rankings.length}</div>
+              <div className="text-2xl font-bold">{filteredRankings.length}</div>
               <p className="text-xs text-muted-foreground">
-                Classement complet
+                {filteredRankings.length !== rankings.length
+                  ? `Filtré sur ${rankings.length}`
+                  : "Classement complet"}
               </p>
             </CardContent>
           </Card>
@@ -191,10 +293,10 @@ export default function RankingsPage() {
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold">
-                {rankings[0]?.performance || "-"}
+                {filteredRankings[0]?.performance || "-"}
               </div>
               <p className="text-xs text-muted-foreground">
-                {rankings[0]?.athlete_nom || "Aucune donnée"}
+                {filteredRankings[0]?.athlete_nom || "Aucune donnée"}
               </p>
             </CardContent>
           </Card>
